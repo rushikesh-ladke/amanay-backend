@@ -2,22 +2,22 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
-
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: 'mysql', // or 'postgres' or 'sqlite'
-      host: process.env.HOST,
-      port: Number(process.env.PORT),  // change based on your DB type
-      username: process.env.USERNAME,  // your DB username
-      password: process.env.PASSWORD,  // your DB password
-      database: process.env.DATABASE,  // your DB name
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],  // auto-load entities
-      synchronize: true,  // should be false in production
+      type: 'mysql',
+      host: process.env.AMANAY_HOST,
+      port: Number(process.env.AMANAY_PORT),
+      username: process.env.AMANAY_USERNAME,
+      password: process.env.AMANAY_PASSWORD,
+      database: process.env.AMANAY_DATABASE,
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true,
     }),
     UserModule,
-
   ],
   controllers: [AppController],
   providers: [AppService],
