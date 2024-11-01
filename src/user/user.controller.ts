@@ -1,23 +1,142 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+// src/user/user.controller.ts
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpStatus,
+  Query,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+import { 
+  ApiTags, 
+  ApiOperation, 
+  ApiResponse, 
+  ApiBearerAuth,
+  ApiQuery 
+} from '@nestjs/swagger';
 import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { User } from './user.entity';
 
+@ApiTags('users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async createUser(@Body() data: Partial<User>): Promise<User> {
-    return this.userService.createUser(data);
+  @ApiOperation({ summary: 'Create a new user' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'User has been successfully created.',
+    type: User,
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Email already exists.',
+  })
+  async create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
   }
 
-  @Get()
-  async getAllUsers(): Promise<User[]> {
-    return this.userService.getAllUsers();
-  }
+  // @Get()
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Get all users' })
+  // @ApiQuery({ name: 'page', required: false, type: Number })
+  // @ApiQuery({ name: 'limit', required: false, type: Number })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   description: 'Return all users.',
+  //   type: [User],
+  // })
+  // async findAll(
+  //   @Query('page') page: number = 1,
+  //   @Query('limit') limit: number = 10,
+  // ) {
+  //   return this.userService.findAll(page, limit);
+  // }
 
   @Get(':id')
-  async findUserById(@Param('id') id: number): Promise<User | null> {
-    return this.userService.findUserById(id);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user by id' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Return the user.',
+    type: User,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'User not found.',
+  })
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userService.findById(id);
   }
+
+  // @Patch(':id')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Update user information' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   description: 'User has been successfully updated.',
+  //   type: User,
+  // })
+  // @ApiResponse({
+  //   status: HttpStatus.NOT_FOUND,
+  //   description: 'User not found.',
+  // })
+  // async update(
+  //   @Param('id', ParseUUIDPipe) id: string,
+  //   @Body() updateUserDto: UpdateUserDto,
+  // ) {
+  //   return this.userService.update(id, updateUserDto);
+  // }
+
+  // @Delete(':id')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Delete user' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   description: 'User has been successfully deleted.',
+  // })
+  // @ApiResponse({
+  //   status: HttpStatus.NOT_FOUND,
+  //   description: 'User not found.',
+  // })
+  // async remove(@Param('id', ParseUUIDPipe) id: string) {
+  //   return this.userService.remove(id);
+  // }
+
+  // @Patch(':id/deactivate')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Deactivate user account' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   description: 'User has been successfully deactivated.',
+  // })
+  // async deactivate(@Param('id', ParseUUIDPipe) id: string) {
+  //   return this.userService.deactivate(id);
+  // }
+
+  // @Patch(':id/activate')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Activate user account' })
+  // @ApiResponse({
+  //   status: HttpStatus.OK,
+  //   description: 'User has been successfully activated.',
+  // })
+  // async activate(@Param('id', ParseUUIDPipe) id: string) {
+  //   return this.userService.activate(id);
+  // }
 }

@@ -1,19 +1,30 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
-@Entity('users', { database: 'new_database' })
+@Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column()
-  name: string;
-
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
-  age: number;
+  @Exclude()
+  password: string;
 
   @Column()
-  created_at: string;
+  firstName: string;
+
+  @Column()
+  lastName: string;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
