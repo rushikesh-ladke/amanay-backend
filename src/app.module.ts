@@ -4,9 +4,11 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
+import { NotesModule } from './notes/notes.module';
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.AMANAY_HOST,
@@ -18,6 +20,8 @@ import { UserModule } from './user/user.module';
       synchronize: true,
     }),
     UserModule,
+    AuthModule,
+    NotesModule
   ],
   controllers: [AppController],
   providers: [AppService],

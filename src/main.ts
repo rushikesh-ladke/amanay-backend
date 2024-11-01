@@ -1,13 +1,23 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-
-import * as dotenv from 'dotenv'; // Import dotenv
-
-dotenv.config(); // Load environment variables from .env
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(process.env.HOST);
+  app.useGlobalPipes(new ValidationPipe());
+  app.enableCors();
+
+  const config = new DocumentBuilder()
+    .setTitle('User Management API')
+    .setDescription('API for user management and authentication')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
+  await app.listen(3000);
 }
 bootstrap();
