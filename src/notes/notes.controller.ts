@@ -20,7 +20,7 @@ import {
   import { CreateNoteDto, UpdateNoteDto } from './dto/notes.dto';
   import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
   import { Note } from './notes.entity';
-import { User } from 'src/decorators/user.decorator';
+import { User } from '../decorators/user.decorator';
   
   @ApiTags('notes')
   @Controller('notes')
