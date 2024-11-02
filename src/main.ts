@@ -7,7 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
-
+console.log('NODE_ENV:', process.env.NODE_ENV);
   const config = new DocumentBuilder()
     .setTitle('User Management API')
     .setDescription('API for user management and authentication')
