@@ -1,24 +1,34 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import * as express from 'express';
+
+const server = express();
+
+let app;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
-  app.enableCors();
-
-  const config = new DocumentBuilder()
-    .setTitle('User Management API')
-    .setDescription('API for user management and authentication')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
-
-  await app.init();
+  if (!app) {
+    app = await NestFactory.create(
+      AppModule,
+      new ExpressAdapter(server),
+    );
+    app.enableCors();
+    await app.init();
+  }
   return app;
 }
-export default bootstrap;
+
+export default async function handler(req, res) {
+  const app = await bootstrap();
+  const expressInstance = app.getHttpAdapter().getInstance();
+  return expressInstance(req, res);
+}
+
+console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
+// For local development only
+if (process.env.NODE_ENV !== 'production') {
+  bootstrap().then(app => {
+    app.listen(3000);
+  });
+}
