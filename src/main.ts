@@ -18,6 +18,15 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  if (process.env.NODE_ENV !== 'production') {
+    await app.listen(3000);
+  }
+
+  await app.init();
+  return app;
 }
-bootstrap();
+export default bootstrap;
+
+if (process.env.NODE_ENV !== 'production') {
+  bootstrap();
+}
