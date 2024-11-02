@@ -7,7 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
-console.log('NODE_ENV:', process.env.NODE_ENV);
+
   const config = new DocumentBuilder()
     .setTitle('User Management API')
     .setDescription('API for user management and authentication')
@@ -18,15 +18,7 @@ console.log('NODE_ENV:', process.env.NODE_ENV);
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  if (process.env.NODE_ENV !== 'production') {
-    await app.listen(3000);
-  }
-
   await app.init();
   return app;
 }
 export default bootstrap;
-
-if (process.env.NODE_ENV !== 'production') {
-  bootstrap();
-}
