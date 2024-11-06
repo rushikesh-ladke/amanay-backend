@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   return expressInstance(req, res);
 }
 
-console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
+console.log('process.env.NODE_ENV: ', process.env.CA_CERTIFICATE);
 // For local development only
 if (process.env.NODE_ENV !== 'production') {
   bootstrap().then(app => {

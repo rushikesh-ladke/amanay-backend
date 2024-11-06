@@ -1,148 +1,67 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Patch,
-    Delete,
-    Body,
-    Param,
-    UseGuards,
-    HttpStatus,
-    ParseUUIDPipe,
-  } from '@nestjs/common';
-  import { 
-    ApiTags, 
-    ApiOperation, 
-    ApiResponse, 
-    ApiBearerAuth,
-  } from '@nestjs/swagger';
-  import { NotesService } from './notes.service';
-  import { CreateNoteDto, UpdateNoteDto } from './dto/notes.dto';
-  import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
-  import { Note } from './notes.entity';
-import { User } from '../decorators/user.decorator';
-  
-  @ApiTags('notes')
-  @Controller('notes')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  export class NotesController {
-    constructor(private readonly notesService: NotesService) {}
-  
-    @Post()
-    @ApiOperation({ summary: 'Create a new note' })
-    @ApiResponse({
-      status: HttpStatus.CREATED,
-      description: 'Note has been successfully created.',
-      type: Note,
-    })
-    @ApiResponse({
-      status: HttpStatus.BAD_REQUEST,
-      description: 'Invalid input data.',
-    })
-    @ApiResponse({
-      status: HttpStatus.UNAUTHORIZED,
-      description: 'User is not authorized.',
-    })
-    async create(
-      @Body() createNoteDto: CreateNoteDto, 
-      @User('id', ParseUUIDPipe) userId: string
-    ) {
-      return this.notesService.create(createNoteDto, userId);
-    }
-  
-    @Get()
-    @ApiOperation({ summary: 'Get all notes' })
-    @ApiResponse({
-      status: HttpStatus.OK,
-      description: 'Returns all accessible notes for the user.',
-      type: [Note],
-    })
-    @ApiResponse({
-      status: HttpStatus.UNAUTHORIZED,
-      description: 'User is not authorized.',
-    })
-    async findAll(
-      @User('id', ParseUUIDPipe) userId: string
-    ) {
-      return this.notesService.findAll(userId);
-    }
-  
-    // @Get(':id')
-    // @ApiOperation({ summary: 'Get note by id' })
-    // @ApiResponse({
-    //   status: HttpStatus.OK,
-    //   description: 'Returns the note if user has access.',
-    //   type: Note,
-    // })
-    // @ApiResponse({
-    //   status: HttpStatus.NOT_FOUND,
-    //   description: 'Note not found.',
-    // })
-    // @ApiResponse({
-    //   status: HttpStatus.UNAUTHORIZED,
-    //   description: 'User is not authorized.',
-    // })
-    // @ApiResponse({
-    //   status: HttpStatus.FORBIDDEN,
-    //   description: 'User does not have access to this note.',
-    // })
-    // async findOne(
-    //   @Param('id', ParseUUIDPipe) id: string,
-    //   @User('id', ParseUUIDPipe) userId: string
-    // ) {
-    //   return this.notesService.findOne(id, userId);
-    // }
-  
-    // @Patch(':id')
-    // @ApiOperation({ summary: 'Update note' })
-    // @ApiResponse({
-    //   status: HttpStatus.OK,
-    //   description: 'Note has been successfully updated.',
-    //   type: Note,
-    // })
-    // @ApiResponse({
-    //   status: HttpStatus.NOT_FOUND,
-    //   description: 'Note not found.',
-    // })
-    // @ApiResponse({
-    //   status: HttpStatus.UNAUTHORIZED,
-    //   description: 'User is not authorized.',
-    // })
-    // @ApiResponse({
-    //   status: HttpStatus.FORBIDDEN,
-    //   description: 'User does not have permission to update this note.',
-    // })
-    // async update(
-    //   @Param('id', ParseUUIDPipe) id: string, 
-    //   @Body() updateNoteDto: UpdateNoteDto,
-    //   @User('id', ParseUUIDPipe) userId: string
-    // ) {
-    //   return this.notesService.update(id, updateNoteDto, userId);
-    // }
-  
-    // @Delete(':id')
-    // @ApiOperation({ summary: 'Delete note' })
-    // @ApiResponse({
-    //   status: HttpStatus.OK,
-    //   description: 'Note has been successfully deleted.',
-    // })
-    // @ApiResponse({
-    //   status: HttpStatus.NOT_FOUND,
-    //   description: 'Note not found.',
-    // })
-    // @ApiResponse({
-    //   status: HttpStatus.UNAUTHORIZED,
-    //   description: 'User is not authorized.',
-    // })
-    // @ApiResponse({
-    //   status: HttpStatus.FORBIDDEN,
-    //   description: 'User does not have permission to delete this note.',
-    // })
-    // async remove(
-    //   @Param('id', ParseUUIDPipe) id: string,
-    //   @User('id', ParseUUIDPipe) userId: string
-    // ) {
-    //   return this.notesService.remove(id, userId);
-    // }
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Body, 
+  Patch, 
+  Param, 
+  Delete, 
+  UseGuards,
+  Request 
+} from '@nestjs/common';
+import { NotesService } from './notes.service';
+import { CreateNoteDto, UpdateNoteDto, NoteAccessDto } from './dto/create-note.dto';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt-auth.guard';
+
+@ApiTags('notes')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('notes')
+export class NotesController {
+  constructor(private readonly notesService: NotesService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new note' })
+  create(@Body() createNoteDto: CreateNoteDto, @Request() req) {
+    return this.notesService.create(createNoteDto, req.user);
   }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all notes for current user' })
+  findAll(@Request() req) {
+    return this.notesService.findAll(req.user);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a specific note by ID' })
+  findOne(@Param('id') id: string, @Request() req) {
+    return this.notesService.findOne(id, req.user);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a note' })
+  update(
+    @Param('id') id: string, 
+    @Body() updateNoteDto: UpdateNoteDto,
+    @Request() req
+  ) {
+    return this.notesService.update(id, updateNoteDto, req.user);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Soft delete a note' })
+  remove(@Param('id') id: string, @Request() req) {
+    return this.notesService.remove(id, req.user);
+  }
+
+  @Post(':id/access')
+  @ApiOperation({ summary: 'Grant access to a note' })
+  grantAccess(
+    @Param('id') id: string,
+    @Body() accessDto: NoteAccessDto,
+    @Request() req
+  ) {
+    return this.notesService.grantAccess(id, accessDto, req.user);
+  }
+}
