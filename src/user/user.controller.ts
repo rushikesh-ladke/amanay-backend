@@ -24,6 +24,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { User } from './user.entity';
+import { UpdateUserSettingsDto } from './dto/update-user-settings.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -139,4 +140,41 @@ export class UserController {
   // async activate(@Param('id', ParseUUIDPipe) id: string) {
   //   return this.userService.activate(id);
   // }
+
+  @Get(':id/settings')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user settings' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Return the user settings.',
+    type: User,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'User not found.',
+  })
+  async getUserSettings(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userService.getUserSettings(id);
+  }
+
+  @Patch(':id/settings')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update user settings' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Settings have been successfully updated.',
+    type: User,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'User not found.',
+  })
+  async updateSettings(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateSettingsDto: UpdateUserSettingsDto,
+  ) {
+    return this.userService.updateSettings(id, updateSettingsDto);
+  }
 }

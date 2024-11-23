@@ -27,7 +27,7 @@ export class Note {
   @Column()
   name: string;
 
-  @Column({ unique: true })
+  @Column()
   nameId: string;
 
   @Column('text', { array: true, default: [] })
